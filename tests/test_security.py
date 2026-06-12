@@ -40,7 +40,7 @@ def test_admin_panel_visible_to_admin():
         headers={"Tailscale-User-Login": "user@example.com"},
     )
     assert resp.status_code == 200
-    assert "Queue Control" in resp.text
+    assert "enqueue" in resp.text
 
 
 def test_unknown_panel_returns_404():
@@ -80,8 +80,8 @@ def test_rondo_grid_loads():
 def test_health_panel_renders():
     resp = client.get("/panels/infra-airflow")
     assert resp.status_code == 200
-    assert "Airflow" in resp.text
     assert "ok" in resp.text
+    assert "UTC" in resp.text
 
 
 def test_minio_panel_shows_down():

@@ -1,6 +1,6 @@
 <div class="mb-5 flex items-center justify-between">
   <h2 class="text-lg font-semibold font-mono">{{ service.title }}</h2>
-  <button class="btn btn-xs btn-ghost font-mono opacity-50"
+  <button class="btn btn-xs btn-ghost font-mono opacity-40 hover:opacity-80"
           onclick="resetLayout('{{ service.key }}')">reset layout</button>
 </div>
 
@@ -11,14 +11,29 @@
          gs-id="{{ panel.id }}"
          gs-w="{{ panel.grid_w }}"
          gs-h="{{ panel.grid_h }}">
-      <div class="grid-stack-item-content card bg-base-200 border border-base-300 overflow-hidden"
-           id="panel-{{ panel.id }}"
-           hx-get="/panels/{{ panel.id }}"
-           hx-trigger="load{% if panel.refresh_seconds > 0 %}, every {{ panel.refresh_seconds }}s{% endif %}"
-           hx-swap="innerHTML">
-        <div class="card-body items-center justify-center py-8">
-          <span class="loading loading-spinner loading-sm opacity-40"></span>
+      <div class="grid-stack-item-content card bg-base-200 border border-base-300">
+
+        <!-- drag handle -->
+        <div class="gs-drag-handle">
+          <div class="grip">
+            <span></span><span></span>
+            <span></span><span></span>
+            <span></span><span></span>
+          </div>
+          <span class="text-xs font-mono text-base-content/35">{{ panel.title }}</span>
         </div>
+
+        <!-- HTMX content -->
+        <div class="card-scroll"
+             id="panel-{{ panel.id }}"
+             hx-get="/panels/{{ panel.id }}"
+             hx-trigger="load{% if panel.refresh_seconds > 0 %}, every {{ panel.refresh_seconds }}s{% endif %}"
+             hx-swap="innerHTML">
+          <div class="card-body items-center justify-center py-8">
+            <span class="loading loading-spinner loading-sm opacity-40"></span>
+          </div>
+        </div>
+
       </div>
     </div>
     {% endif %}
@@ -38,6 +53,7 @@
     animate: true,
     float: false,
     staticGrid: isMobile,
+    handle: '.gs-drag-handle',
     resizable: { handles: 'se' },
     margin: 6,
   }, '#panel-grid');
