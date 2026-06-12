@@ -7,7 +7,7 @@
     {% for item in data.items %}
     <div class="flex items-center justify-between">
       <span class="text-xs font-mono text-base-content/60">{{ item.competition_id }}</span>
-      <span class="text-[10px] font-mono
+      <span class="text-xs font-mono
         {% if item.status == 'running' %}text-success
         {% else %}text-base-content/40{% endif %}">{{ item.status }}</span>
     </div>
