@@ -1,22 +1,3 @@
-<div class="mb-5 flex items-center justify-between gap-3">
-  <h2 class="text-lg font-semibold font-mono">{{ service.title }}</h2>
-  <div class="flex items-center gap-2">
-
-    <!-- panel picker: 숨긴 패널이 있을 때만 표시 -->
-    <div class="relative" id="panel-picker" style="display:none">
-      <button class="btn btn-xs btn-ghost font-mono opacity-50 hover:opacity-90"
-              id="panel-picker-btn"
-              onclick="togglePicker()">+ panel</button>
-      <ul id="panel-picker-list"
-          class="hidden bg-base-200 rounded-box shadow-lg border border-base-300 p-2 flex flex-col gap-0.5">
-      </ul>
-    </div>
-
-    <button class="btn btn-xs btn-ghost font-mono opacity-40 hover:opacity-80"
-            onclick="resetLayout('{{ service.key }}')">reset</button>
-  </div>
-</div>
-
 <div class="grid-stack" id="panel-grid">
   {% for panel in service.panels() %}
     {% if panel.public or role == "admin" %}
@@ -56,6 +37,11 @@
   const LAYOUT_KEY  = 'ec-grid-'   + SERVICE_KEY;
   const HIDDEN_KEY  = 'ec-hidden-' + SERVICE_KEY;
   const isMobile    = window.innerWidth < 768;
+
+  // base.html 탭 바의 버튼들에 서비스 키 연결
+  window.EC_SERVICE_KEY = SERVICE_KEY;
+  const resetBtn = document.getElementById('reset-btn');
+  if (resetBtn) resetBtn.style.display = '';
 
   const grid = GridStack.init({
     cellHeight: 90,
@@ -101,7 +87,6 @@
     if (!el) return;
     el.style.display = '';
     grid.makeWidget(el);
-    // HTMX content가 아직 안 로드됐을 수 있어서 강제 트리거
     const htmxEl = el.querySelector('[hx-get]');
     if (htmxEl) htmx.trigger(htmxEl, 'load');
     hiddenIds.delete(id);
@@ -132,13 +117,14 @@
   function _removeFromGrid(id) {
     const el = document.querySelector(`[gs-id="${id}"]`);
     if (!el) return;
-    grid.removeWidget(el, false);  // DOM은 유지
+    grid.removeWidget(el, false);
     el.style.display = 'none';
   }
 
   function _syncPicker() {
     const list   = document.getElementById('panel-picker-list');
     const picker = document.getElementById('panel-picker');
+    if (!list || !picker) return;
     list.innerHTML = '';
 
     if (hiddenIds.size === 0) {

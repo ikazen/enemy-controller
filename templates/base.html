@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="sunset">
+<html lang="ko" data-theme="dim">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,21 +27,67 @@
     }
     .card-scroll { flex: 1; overflow-y: auto; min-height: 0; }
 
+    /* Service tabs */
+    .service-tab {
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      font-weight: 450;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      background: none;
+      cursor: pointer;
+      white-space: nowrap;
+      opacity: 0.4;
+      letter-spacing: 0.01em;
+      transition: opacity 0.15s;
+    }
+    .service-tab:hover { opacity: 0.75; }
+    .service-tab.tab-active { opacity: 1; border-bottom-color: currentColor; font-weight: 500; }
+
+    /* Action buttons */
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      border: 1px solid rgb(255 255 255 / 0.18);
+      background: transparent;
+      color: rgb(255 255 255 / 0.55);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .action-btn:hover {
+      background: rgb(255 255 255 / 0.07);
+      color: rgb(255 255 255 / 0.9);
+      border-color: rgb(255 255 255 / 0.3);
+    }
+
     /* Drag handle strip */
     .gs-drag-handle {
       display: flex;
       align-items: center;
-      padding: 5px 10px 5px 12px;
-      border-bottom: 1px solid oklch(var(--bc) / 0.08);
+      padding: 14px 14px 8px;
+      border-bottom: 1px solid rgb(0 0 0 / 0.08);
       cursor: grab;
       user-select: none;
       flex-shrink: 0;
       transition: background 0.15s;
     }
-    .gs-drag-handle:hover { background: oklch(var(--bc) / 0.04); }
+    .gs-drag-handle:hover { background: rgb(255 255 255 / 0.03); }
     .gs-drag-handle:active { cursor: grabbing; }
 
-    /* Hide button — appears on handle hover */
+    /* panel title */
+    .gs-drag-handle > span { font-size: 1.125rem; }
+
+    /* panel content */
+    .card-scroll .card-body { padding: 1.25rem; }
+    .card-scroll .text-xs   { font-size: 0.875rem; }
+    .card-scroll .text-sm   { font-size: 1rem; }
+
+    /* Hide button */
     .gs-drag-handle .hide-btn {
       margin-left: auto;
       opacity: 0;
@@ -52,24 +98,25 @@
       line-height: 1;
       padding: 1px 3px;
       border-radius: 3px;
-      color: oklch(var(--bc) / 0.4);
+      color: rgb(255 255 255 / 0.4);
       transition: opacity 0.15s, color 0.15s, background 0.15s;
     }
     .gs-drag-handle:hover .hide-btn { opacity: 1; }
-    .gs-drag-handle .hide-btn:hover {
-      color: oklch(var(--er) / 0.8);
-      background: oklch(var(--er) / 0.08);
+    .gs-drag-handle .hide-btn:hover { color: oklch(var(--er)); background: rgb(255 255 255 / 0.05); }
+
+    /* Resize handle */
+    .grid-stack > .grid-stack-item > .ui-resizable-handle.ui-resizable-se {
+      width: 14px; height: 14px;
+      right: 4px; bottom: 4px;
+      background:
+        radial-gradient(circle, rgb(255 255 255 / 0.3) 1.2px, transparent 1.2px) 0 0 / 5px 5px,
+        radial-gradient(circle, rgb(255 255 255 / 0.3) 1.2px, transparent 1.2px) 5px 5px / 5px 5px;
+      background-repeat: repeat;
+      opacity: 0;
+      transition: opacity 0.15s;
+      cursor: se-resize;
     }
-
-    /* ── Font scaling ── */
-    /* panel title (drag handle) */
-    .gs-drag-handle { padding: 14px 14px 8px; }
-    .gs-drag-handle > span { font-size: 1.125rem; }
-
-    /* panel content */
-    .card-scroll .card-body { padding: 1.25rem; }
-    .card-scroll .text-xs   { font-size: 0.875rem; }
-    .card-scroll .text-sm   { font-size: 1rem; }
+    .grid-stack > .grid-stack-item:hover > .ui-resizable-handle.ui-resizable-se { opacity: 1; }
 
     /* Panel picker */
     .picker-item {
@@ -80,7 +127,7 @@
       border-radius: 5px;
       transition: background 0.12s;
     }
-    .picker-item:hover { background: rgb(0 0 0 / 0.08); }
+    .picker-item:hover { background: rgb(255 255 255 / 0.08); }
     #panel-picker-list {
       position: absolute;
       right: 0;
@@ -89,84 +136,69 @@
       z-index: 50;
     }
 
-    /* Mobile: no grab cursor */
     @media (max-width: 767px) {
       .gs-drag-handle { cursor: default; }
       .gs-drag-handle .hide-btn { display: none; }
     }
-
-    /* Resize handle — dot pattern, hover-only */
-    .grid-stack > .grid-stack-item > .ui-resizable-handle.ui-resizable-se {
-      width: 14px;
-      height: 14px;
-      right: 4px;
-      bottom: 4px;
-      background:
-        radial-gradient(circle, oklch(var(--bc) / 0.35) 1.2px, transparent 1.2px) 0 0 / 5px 5px,
-        radial-gradient(circle, oklch(var(--bc) / 0.35) 1.2px, transparent 1.2px) 5px 5px / 5px 5px;
-      background-repeat: repeat;
-      opacity: 0;
-      transition: opacity 0.15s;
-      cursor: se-resize;
-    }
-    .grid-stack > .grid-stack-item:hover > .ui-resizable-handle.ui-resizable-se { opacity: 1; }
-
   </style>
 </head>
 <body class="min-h-screen bg-base-100">
+<div class="max-w-[1800px] mx-auto px-8 pt-7 pb-12">
 
-<div class="drawer lg:drawer-open">
-  <input id="sidebar-toggle" type="checkbox" class="drawer-toggle">
-
-  <div class="drawer-content flex flex-col min-h-screen">
-    <!-- topbar -->
-    <header class="navbar bg-base-200 border-b border-base-300 sticky top-0 z-10 px-4">
-      <div class="flex-none lg:hidden">
-        <label for="sidebar-toggle" class="btn btn-ghost btn-square" aria-label="open sidebar">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-        </label>
-      </div>
-      <div class="flex-1">
-        <span class="font-mono font-semibold text-base">enemy-controller</span>
-      </div>
-      <div class="flex-none">
-        {% if role == "admin" %}
-          <span class="badge badge-warning font-mono text-xs">admin</span>
-        {% else %}
-          <span class="badge badge-ghost font-mono text-xs">public</span>
-        {% endif %}
-      </div>
-    </header>
-
-    <!-- swappable main content -->
-    <main id="main-content" class="p-6 flex-1">
-      {% block main %}{% endblock %}
-    </main>
+  <!-- 타이틀 -->
+  <div class="flex items-center gap-3 mb-6">
+    <h1 class="font-mono font-semibold text-xl tracking-tight">enemy-controller</h1>
+    {% if role == "admin" %}
+      <span class="badge badge-warning badge-sm font-mono">admin</span>
+    {% endif %}
   </div>
 
-  <!-- sidebar -->
-  <div class="drawer-side z-20">
-    <label for="sidebar-toggle" class="drawer-overlay"></label>
-    <nav class="w-52 min-h-full bg-base-200 border-r border-base-300 flex flex-col p-4 gap-1">
-      <p class="text-xs text-base-content/40 uppercase tracking-widest px-3 py-2">Services</p>
-      <ul class="menu menu-sm gap-0.5 w-full">
-        {% for s in services %}
-        <li>
-          <a class="font-mono text-sm"
-             hx-get="/services/{{ s.key }}"
-             hx-target="#main-content"
-             hx-swap="innerHTML"
-             hx-push-url="/services/{{ s.key }}">
-            {{ s.title }}
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
+  <!-- 서비스 탭 + 액션 버튼 -->
+  <div class="border-b border-base-300 mb-8 flex items-center">
+    <nav class="flex" id="service-tabs">
+      {% for s in services %}
+      <button class="service-tab {{ 'tab-active' if s.key == active.key else '' }}"
+              data-key="{{ s.key }}"
+              hx-get="/services/{{ s.key }}"
+              hx-target="#main-content"
+              hx-push-url="/services/{{ s.key }}"
+              onclick="setActiveTab('{{ s.key }}')">
+        {{ s.title }}
+      </button>
+      {% endfor %}
     </nav>
+
+    <!-- 그리드 액션 버튼 (grid.html JS가 제어) -->
+    <div class="flex items-center gap-1 ml-auto pl-4 shrink-0">
+      <div class="relative" id="panel-picker" style="display:none">
+        <button class="action-btn"
+                id="panel-picker-btn"
+                onclick="togglePicker()">+ panel</button>
+        <ul id="panel-picker-list"
+            class="hidden bg-base-200 rounded-box shadow-lg border border-base-300 p-2 flex flex-col gap-0.5 absolute right-0 z-50"
+            style="top: calc(100% + 6px); min-width: 11rem;">
+        </ul>
+      </div>
+      <button class="action-btn"
+              id="reset-btn"
+              style="display:none"
+              onclick="resetLayout(window.EC_SERVICE_KEY)">reset</button>
+    </div>
   </div>
+
+  <!-- 콘텐츠 -->
+  <main id="main-content">
+    {% block main %}{% endblock %}
+  </main>
+
 </div>
 
+<script>
+function setActiveTab(key) {
+  document.querySelectorAll('.service-tab').forEach(function(el) {
+    el.classList.toggle('tab-active', el.dataset.key === key);
+  });
+}
+</script>
 </body>
 </html>

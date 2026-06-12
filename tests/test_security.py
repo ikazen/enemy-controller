@@ -10,7 +10,7 @@ client = TestClient(app)
 def test_public_role_no_header():
     resp = client.get("/")
     assert resp.status_code == 200
-    assert "public" in resp.text
+    assert "admin" not in resp.text
 
 
 def test_admin_role_with_tailscale_header():
@@ -69,7 +69,7 @@ def test_control_endpoint_allowed_for_admin():
 def test_infra_grid_loads():
     resp = client.get("/services/infra")
     assert resp.status_code == 200
-    assert "Infra" in resp.text
+    assert "infra-airflow" in resp.text
 
 
 def test_rondo_grid_loads():
