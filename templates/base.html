@@ -61,6 +61,16 @@
       background: oklch(var(--er) / 0.08);
     }
 
+    /* Panel picker item */
+    .picker-item {
+      width: 100%;
+      text-align: left;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: background 0.12s;
+    }
+    .picker-item:hover { background: oklch(var(--bc) / 0.1); }
+
     /* Mobile: no grab cursor */
     @media (max-width: 767px) {
       .gs-drag-handle { cursor: default; }

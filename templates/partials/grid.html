@@ -140,7 +140,7 @@
       const el    = document.querySelector(`[gs-id="${id}"]`);
       const title = el ? el.dataset.panelTitle : id;
       const li    = document.createElement('li');
-      li.innerHTML = `<button class="font-mono text-xs w-full text-left px-3 py-1.5 rounded hover:bg-base-content/10 transition-colors" onclick="showPanel('${id}')">${title}</button>`;
+      li.innerHTML = `<button class="picker-item font-mono text-xs" onclick="showPanel('${id}')">${title}</button>`;
       list.appendChild(li);
     });
   }
