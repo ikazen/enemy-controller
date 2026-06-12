@@ -1,0 +1,145 @@
+<div class="grid-stack" id="panel-grid">
+  {% for panel in service.panels() %}
+    {% if panel.public or role == "admin" %}
+    <div class="grid-stack-item"
+         gs-id="{{ panel.id }}"
+         gs-w="{{ panel.grid_w }}"
+         gs-h="{{ panel.grid_h }}"
+         data-panel-title="{{ panel.title }}">
+      <div class="grid-stack-item-content card bg-base-200">
+
+        <div class="gs-drag-handle">
+          <span class="text-xs font-mono text-base-content/40">{{ panel.title }}</span>
+          <button class="hide-btn"
+                  title="hide panel"
+                  onclick="hidePanel('{{ panel.id }}'); event.stopPropagation();">×</button>
+        </div>
+
+        <div class="card-scroll"
+             id="panel-{{ panel.id }}"
+             hx-get="/panels/{{ panel.id }}"
+             hx-trigger="load{% if panel.refresh_seconds > 0 %}, every {{ panel.refresh_seconds }}s{% endif %}"
+             hx-swap="innerHTML">
+          <div class="card-body items-center justify-center py-8">
+            <span class="loading loading-spinner loading-sm opacity-40"></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<script>
+(function () {
+  const SERVICE_KEY = '{{ service.key }}';
+  const LAYOUT_KEY  = 'ec-grid-'   + SERVICE_KEY;
+  const HIDDEN_KEY  = 'ec-hidden-' + SERVICE_KEY;
+  const isMobile    = window.innerWidth < 768;
+
+  // base.html 탭 바의 버튼들에 서비스 키 연결
+  window.EC_SERVICE_KEY = SERVICE_KEY;
+  const resetBtn = document.getElementById('reset-btn');
+  if (resetBtn) resetBtn.style.display = '';
+
+  const grid = GridStack.init({
+    cellHeight: 90,
+    column: 12,
+    oneColumnSize: 768,
+    animate: true,
+    float: false,
+    staticGrid: isMobile,
+    handle: '.gs-drag-handle',
+    resizable: { handles: 'se' },
+    margin: 6,
+  }, '#panel-grid');
+
+  // 저장된 레이아웃 복원
+  const savedLayout = localStorage.getItem(LAYOUT_KEY);
+  if (savedLayout) {
+    try { grid.load(JSON.parse(savedLayout), false); }
+    catch (_) { localStorage.removeItem(LAYOUT_KEY); }
+  }
+
+  // 숨긴 패널 복원
+  let hiddenIds = new Set(JSON.parse(localStorage.getItem(HIDDEN_KEY) || '[]'));
+  hiddenIds.forEach(id => _removeFromGrid(id));
+  _syncPicker();
+
+  // 레이아웃 변경 시 저장
+  grid.on('change dragstop resizestop', () => {
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify(grid.save(false)));
+  });
+
+  // --- 공개 함수 ---
+
+  window.hidePanel = function (id) {
+    _removeFromGrid(id);
+    hiddenIds.add(id);
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hiddenIds]));
+    _syncPicker();
+  };
+
+  window.showPanel = function (id) {
+    document.getElementById('panel-picker-list')?.classList.add('hidden');
+    const el = document.querySelector(`[gs-id="${id}"]`);
+    if (!el) return;
+    el.style.display = '';
+    grid.makeWidget(el);
+    const htmxEl = el.querySelector('[hx-get]');
+    if (htmxEl) htmx.trigger(htmxEl, 'load');
+    hiddenIds.delete(id);
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hiddenIds]));
+    _syncPicker();
+  };
+
+  window.togglePicker = function () {
+    document.getElementById('panel-picker-list').classList.toggle('hidden');
+  };
+
+  document.addEventListener('click', function (e) {
+    const picker = document.getElementById('panel-picker');
+    if (picker && !picker.contains(e.target)) {
+      document.getElementById('panel-picker-list')?.classList.add('hidden');
+    }
+  });
+
+  window.resetLayout = function (key) {
+    if (key !== SERVICE_KEY) return;
+    localStorage.removeItem(LAYOUT_KEY);
+    localStorage.removeItem(HIDDEN_KEY);
+    location.reload();
+  };
+
+  // --- 내부 ---
+
+  function _removeFromGrid(id) {
+    const el = document.querySelector(`[gs-id="${id}"]`);
+    if (!el) return;
+    grid.removeWidget(el, false);
+    el.style.display = 'none';
+  }
+
+  function _syncPicker() {
+    const list   = document.getElementById('panel-picker-list');
+    const picker = document.getElementById('panel-picker');
+    if (!list || !picker) return;
+    list.innerHTML = '';
+
+    if (hiddenIds.size === 0) {
+      picker.style.display = 'none';
+      return;
+    }
+
+    picker.style.display = '';
+    hiddenIds.forEach(id => {
+      const el    = document.querySelector(`[gs-id="${id}"]`);
+      const title = el ? el.dataset.panelTitle : id;
+      const li    = document.createElement('li');
+      li.innerHTML = `<button class="picker-item font-mono text-xs" onclick="showPanel('${id}')">${title}</button>`;
+      list.appendChild(li);
+    });
+  }
+})();
+</script>

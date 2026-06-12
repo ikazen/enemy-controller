@@ -1,0 +1,14 @@
+<div class="card-body p-4 gap-2">
+  <div class="flex flex-col gap-1">
+    {% set metrics = data.metrics if data is mapping else data %}
+    {% for m in metrics %}
+    <div class="flex justify-between items-center">
+      <span class="text-xs text-base-content/50">{{ m.label }}</span>
+      <span class="text-xs font-mono font-medium">{{ m.value }}</span>
+    </div>
+    {% if m.hint %}
+    <p class="text-xs text-base-content/40 font-mono -mt-0.5 text-right">{{ m.hint }}</p>
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>

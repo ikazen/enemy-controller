@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dim">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>enemy-controller</title>
+  <link rel="stylesheet" href="/static/themes.css">
+  <link rel="stylesheet" href="/static/daisyui.css">
+  <link rel="stylesheet" href="/static/gridstack.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/static/htmx.min.js"></script>
+  <script src="/static/gridstack-all.js"></script>
+  <style>
+    /* GridStack item shell */
+    .grid-stack-item-content {
+      inset: 0;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+    }
+    .grid-stack-item-content > .card {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-scroll { flex: 1; overflow-y: auto; min-height: 0; }
+
+    /* Service tabs */
+    .service-tab {
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      font-weight: 450;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      background: none;
+      cursor: pointer;
+      white-space: nowrap;
+      opacity: 0.4;
+      letter-spacing: 0.01em;
+      transition: opacity 0.15s;
+    }
+    .service-tab:hover { opacity: 0.75; }
+    .service-tab.tab-active { opacity: 1; border-bottom-color: currentColor; font-weight: 500; }
+
+    /* Action buttons */
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      border: 1px solid rgb(255 255 255 / 0.18);
+      background: transparent;
+      color: rgb(255 255 255 / 0.55);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .action-btn:hover {
+      background: rgb(255 255 255 / 0.07);
+      color: rgb(255 255 255 / 0.9);
+      border-color: rgb(255 255 255 / 0.3);
+    }
+
+    /* Drag handle strip */
+    .gs-drag-handle {
+      display: flex;
+      align-items: center;
+      padding: 14px 14px 8px;
+      border-bottom: 1px solid rgb(0 0 0 / 0.08);
+      cursor: grab;
+      user-select: none;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .gs-drag-handle:hover { background: rgb(255 255 255 / 0.03); }
+    .gs-drag-handle:active { cursor: grabbing; }
+
+    /* panel title */
+    .gs-drag-handle > span { font-size: 1.125rem; }
+
+    /* panel content */
+    .card-scroll .card-body { padding: 1.25rem; }
+    .card-scroll .text-xs   { font-size: 0.875rem; }
+    .card-scroll .text-sm   { font-size: 1rem; }
+
+    /* Hide button */
+    .gs-drag-handle .hide-btn {
+      margin-left: auto;
+      opacity: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 1px 3px;
+      border-radius: 3px;
+      color: rgb(255 255 255 / 0.4);
+      transition: opacity 0.15s, color 0.15s, background 0.15s;
+    }
+    .gs-drag-handle:hover .hide-btn { opacity: 1; }
+    .gs-drag-handle .hide-btn:hover { color: oklch(var(--er)); background: rgb(255 255 255 / 0.05); }
+
+    /* Resize handle */
+    .grid-stack > .grid-stack-item > .ui-resizable-handle.ui-resizable-se {
+      width: 14px; height: 14px;
+      right: 4px; bottom: 4px;
+      background:
+        radial-gradient(circle, rgb(255 255 255 / 0.3) 1.2px, transparent 1.2px) 0 0 / 5px 5px,
+        radial-gradient(circle, rgb(255 255 255 / 0.3) 1.2px, transparent 1.2px) 5px 5px / 5px 5px;
+      background-repeat: repeat;
+      opacity: 0;
+      transition: opacity 0.15s;
+      cursor: se-resize;
+    }
+    .grid-stack > .grid-stack-item:hover > .ui-resizable-handle.ui-resizable-se { opacity: 1; }
+
+    /* Panel picker */
+    .picker-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: background 0.12s;
+    }
+    .picker-item:hover { background: rgb(255 255 255 / 0.08); }
+    #panel-picker-list {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 4px);
+      min-width: 11rem;
+      z-index: 50;
+    }
+
+    @media (max-width: 767px) {
+      .gs-drag-handle { cursor: default; }
+      .gs-drag-handle .hide-btn { display: none; }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-100">
+<div class="max-w-[1800px] mx-auto px-8 pt-7 pb-12">
+
+  <!-- 타이틀 -->
+  <div class="flex items-center gap-3 mb-6">
+    <h1 class="font-mono font-semibold text-xl tracking-tight">enemy-controller</h1>
+    {% if role == "admin" %}
+      <span class="badge badge-warning badge-sm font-mono">admin</span>
+    {% endif %}
+  </div>
+
+  <!-- 서비스 탭 + 액션 버튼 -->
+  <div class="border-b border-base-300 mb-8 flex items-center">
+    <nav class="flex" id="service-tabs">
+      {% for s in services %}
+      <button class="service-tab {{ 'tab-active' if s.key == active.key else '' }}"
+              data-key="{{ s.key }}"
+              hx-get="/services/{{ s.key }}"
+              hx-target="#main-content"
+              hx-push-url="/services/{{ s.key }}"
+              onclick="setActiveTab('{{ s.key }}')">
+        {{ s.title }}
+      </button>
+      {% endfor %}
+    </nav>
+
+    <!-- 그리드 액션 버튼 (grid.html JS가 제어) -->
+    <div class="flex items-center gap-1 ml-auto pl-4 shrink-0">
+      <div class="relative" id="panel-picker" style="display:none">
+        <button class="action-btn"
+                id="panel-picker-btn"
+                onclick="togglePicker()">+ panel</button>
+        <ul id="panel-picker-list"
+            class="hidden bg-base-200 rounded-box shadow-lg border border-base-300 p-2 flex flex-col gap-0.5 absolute right-0 z-50"
+            style="top: calc(100% + 6px); min-width: 11rem;">
+        </ul>
+      </div>
+      <button class="action-btn"
+              id="reset-btn"
+              style="display:none"
+              onclick="resetLayout(window.EC_SERVICE_KEY)">reset</button>
+    </div>
+  </div>
+
+  <!-- 콘텐츠 -->
+  <main id="main-content">
+    {% block main %}{% endblock %}
+  </main>
+
+</div>
+
+<script>
+function setActiveTab(key) {
+  document.querySelectorAll('.service-tab').forEach(function(el) {
+    el.classList.toggle('tab-active', el.dataset.key === key);
+  });
+}
+</script>
+</body>
+</html>

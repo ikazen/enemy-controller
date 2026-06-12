@@ -1,0 +1,12 @@
+<div class="card-body p-4 gap-3">
+  <p class="text-xs text-base-content/50">admin only — insert or cancel jobs</p>
+  <div class="flex flex-col gap-2">
+    <button class="btn btn-sm btn-outline btn-success font-mono"
+            hx-post="/services/reflexion-rondo/queue"
+            hx-target="next .action-result"
+            hx-swap="innerHTML">
+      + enqueue
+    </button>
+    <div class="action-result text-xs"></div>
+  </div>
+</div>
