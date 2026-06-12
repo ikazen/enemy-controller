@@ -61,15 +61,23 @@
       background: oklch(var(--er) / 0.08);
     }
 
-    /* Panel picker item */
+    /* Panel picker */
     .picker-item {
+      display: block;
       width: 100%;
       text-align: left;
       padding: 5px 10px;
       border-radius: 5px;
       transition: background 0.12s;
     }
-    .picker-item:hover { background: oklch(var(--bc) / 0.1); }
+    .picker-item:hover { background: rgb(0 0 0 / 0.08); }
+    #panel-picker-list {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 4px);
+      min-width: 11rem;
+      z-index: 50;
+    }
 
     /* Mobile: no grab cursor */
     @media (max-width: 767px) {
