@@ -1,7 +1,21 @@
-<div class="mb-5 flex items-center justify-between">
+<div class="mb-5 flex items-center justify-between gap-3">
   <h2 class="text-lg font-semibold font-mono">{{ service.title }}</h2>
-  <button class="btn btn-xs btn-ghost font-mono opacity-40 hover:opacity-80"
-          onclick="resetLayout('{{ service.key }}')">reset layout</button>
+  <div class="flex items-center gap-2">
+
+    <!-- panel picker: 숨긴 패널이 있을 때만 표시 -->
+    <div class="dropdown dropdown-end" id="panel-picker" style="display:none">
+      <button tabindex="0" class="btn btn-xs btn-ghost font-mono opacity-50 hover:opacity-90">
+        + panel
+      </button>
+      <ul tabindex="0"
+          id="panel-picker-list"
+          class="dropdown-content menu bg-base-200 rounded-box shadow-lg border border-base-300 w-48 p-1 mt-1 z-50">
+      </ul>
+    </div>
+
+    <button class="btn btn-xs btn-ghost font-mono opacity-40 hover:opacity-80"
+            onclick="resetLayout('{{ service.key }}')">reset</button>
+  </div>
 </div>
 
 <div class="grid-stack" id="panel-grid">
@@ -10,20 +24,17 @@
     <div class="grid-stack-item"
          gs-id="{{ panel.id }}"
          gs-w="{{ panel.grid_w }}"
-         gs-h="{{ panel.grid_h }}">
+         gs-h="{{ panel.grid_h }}"
+         data-panel-title="{{ panel.title }}">
       <div class="grid-stack-item-content card bg-base-200 border border-base-300">
 
-        <!-- drag handle -->
         <div class="gs-drag-handle">
-          <div class="grip">
-            <span></span><span></span>
-            <span></span><span></span>
-            <span></span><span></span>
-          </div>
-          <span class="text-xs font-mono text-base-content/35">{{ panel.title }}</span>
+          <span class="text-xs font-mono text-base-content/40">{{ panel.title }}</span>
+          <button class="hide-btn"
+                  title="hide panel"
+                  onclick="hidePanel('{{ panel.id }}'); event.stopPropagation();">×</button>
         </div>
 
-        <!-- HTMX content -->
         <div class="card-scroll"
              id="panel-{{ panel.id }}"
              hx-get="/panels/{{ panel.id }}"
@@ -43,8 +54,9 @@
 <script>
 (function () {
   const SERVICE_KEY = '{{ service.key }}';
-  const STORAGE_KEY = 'ec-grid-' + SERVICE_KEY;
-  const isMobile = window.innerWidth < 768;
+  const LAYOUT_KEY  = 'ec-grid-'   + SERVICE_KEY;
+  const HIDDEN_KEY  = 'ec-hidden-' + SERVICE_KEY;
+  const isMobile    = window.innerWidth < 768;
 
   const grid = GridStack.init({
     cellHeight: 90,
@@ -58,23 +70,79 @@
     margin: 6,
   }, '#panel-grid');
 
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      grid.load(JSON.parse(saved), false);
-    } catch (_) {
-      localStorage.removeItem(STORAGE_KEY);
-    }
+  // 저장된 레이아웃 복원
+  const savedLayout = localStorage.getItem(LAYOUT_KEY);
+  if (savedLayout) {
+    try { grid.load(JSON.parse(savedLayout), false); }
+    catch (_) { localStorage.removeItem(LAYOUT_KEY); }
   }
 
-  grid.on('change dragstop resizestop', function () {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(grid.save(false)));
+  // 숨긴 패널 복원
+  let hiddenIds = new Set(JSON.parse(localStorage.getItem(HIDDEN_KEY) || '[]'));
+  hiddenIds.forEach(id => _removeFromGrid(id));
+  _syncPicker();
+
+  // 레이아웃 변경 시 저장
+  grid.on('change dragstop resizestop', () => {
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify(grid.save(false)));
   });
+
+  // --- 공개 함수 ---
+
+  window.hidePanel = function (id) {
+    _removeFromGrid(id);
+    hiddenIds.add(id);
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hiddenIds]));
+    _syncPicker();
+  };
+
+  window.showPanel = function (id) {
+    const el = document.querySelector(`[gs-id="${id}"]`);
+    if (!el) return;
+    el.style.display = '';
+    grid.makeWidget(el);
+    // HTMX content가 아직 안 로드됐을 수 있어서 강제 트리거
+    const htmxEl = el.querySelector('[hx-get]');
+    if (htmxEl) htmx.trigger(htmxEl, 'load');
+    hiddenIds.delete(id);
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hiddenIds]));
+    _syncPicker();
+  };
 
   window.resetLayout = function (key) {
     if (key !== SERVICE_KEY) return;
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LAYOUT_KEY);
+    localStorage.removeItem(HIDDEN_KEY);
     location.reload();
   };
+
+  // --- 내부 ---
+
+  function _removeFromGrid(id) {
+    const el = document.querySelector(`[gs-id="${id}"]`);
+    if (!el) return;
+    grid.removeWidget(el, false);  // DOM은 유지
+    el.style.display = 'none';
+  }
+
+  function _syncPicker() {
+    const list   = document.getElementById('panel-picker-list');
+    const picker = document.getElementById('panel-picker');
+    list.innerHTML = '';
+
+    if (hiddenIds.size === 0) {
+      picker.style.display = 'none';
+      return;
+    }
+
+    picker.style.display = '';
+    hiddenIds.forEach(id => {
+      const el    = document.querySelector(`[gs-id="${id}"]`);
+      const title = el ? el.dataset.panelTitle : id;
+      const li    = document.createElement('li');
+      li.innerHTML = `<button class="font-mono text-xs" onclick="showPanel('${id}')">${title}</button>`;
+      list.appendChild(li);
+    });
+  }
 })();
 </script>
