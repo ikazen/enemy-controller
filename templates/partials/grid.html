@@ -1,18 +1,64 @@
-<div class="mb-5">
+<div class="mb-5 flex items-center justify-between">
   <h2 class="text-lg font-semibold font-mono">{{ service.title }}</h2>
+  <button class="btn btn-xs btn-ghost font-mono opacity-50"
+          onclick="resetLayout('{{ service.key }}')">reset layout</button>
 </div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+
+<div class="grid-stack" id="panel-grid">
   {% for panel in service.panels() %}
     {% if panel.public or role == "admin" %}
-    <div class="card bg-base-200 shadow-sm border border-base-300 min-h-[120px]"
-         id="panel-{{ panel.id }}"
-         hx-get="/panels/{{ panel.id }}"
-         hx-trigger="load{% if panel.refresh_seconds > 0 %}, every {{ panel.refresh_seconds }}s{% endif %}"
-         hx-swap="innerHTML">
-      <div class="card-body items-center justify-center py-8">
-        <span class="loading loading-spinner loading-sm opacity-40"></span>
+    <div class="grid-stack-item"
+         gs-id="{{ panel.id }}"
+         gs-w="{{ panel.grid_w }}"
+         gs-h="{{ panel.grid_h }}">
+      <div class="grid-stack-item-content card bg-base-200 border border-base-300 overflow-hidden"
+           id="panel-{{ panel.id }}"
+           hx-get="/panels/{{ panel.id }}"
+           hx-trigger="load{% if panel.refresh_seconds > 0 %}, every {{ panel.refresh_seconds }}s{% endif %}"
+           hx-swap="innerHTML">
+        <div class="card-body items-center justify-center py-8">
+          <span class="loading loading-spinner loading-sm opacity-40"></span>
+        </div>
       </div>
     </div>
     {% endif %}
   {% endfor %}
 </div>
+
+<script>
+(function () {
+  const SERVICE_KEY = '{{ service.key }}';
+  const STORAGE_KEY = 'ec-grid-' + SERVICE_KEY;
+  const isMobile = window.innerWidth < 768;
+
+  const grid = GridStack.init({
+    cellHeight: 90,
+    column: 12,
+    oneColumnSize: 768,
+    animate: true,
+    float: false,
+    staticGrid: isMobile,
+    resizable: { handles: 'se' },
+    margin: 6,
+  }, '#panel-grid');
+
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      grid.load(JSON.parse(saved), false);
+    } catch (_) {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+
+  grid.on('change dragstop resizestop', function () {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(grid.save(false)));
+  });
+
+  window.resetLayout = function (key) {
+    if (key !== SERVICE_KEY) return;
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  };
+})();
+</script>

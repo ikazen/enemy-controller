@@ -80,6 +80,7 @@ class ReflexionRondoService:
                 fetch=_fetch_best_scores,
                 template="partials/panel_scores.html",
                 refresh_seconds=60,
+                grid_w=6, grid_h=4,
             ),
             Panel(
                 id="rondo-cycles",
@@ -87,6 +88,7 @@ class ReflexionRondoService:
                 fetch=_fetch_cycles,
                 template="partials/panel_metrics.html",
                 refresh_seconds=30,
+                grid_w=3, grid_h=3,
             ),
             Panel(
                 id="rondo-submissions",
@@ -94,6 +96,7 @@ class ReflexionRondoService:
                 fetch=_fetch_submissions,
                 template="partials/panel_submissions.html",
                 refresh_seconds=60,
+                grid_w=3, grid_h=3,
             ),
             Panel(
                 id="rondo-queue",
@@ -101,6 +104,7 @@ class ReflexionRondoService:
                 fetch=_fetch_queue,
                 template="partials/panel_queue.html",
                 refresh_seconds=10,
+                grid_w=4, grid_h=3,
             ),
             Panel(
                 id="rondo-queue-control",
@@ -109,6 +113,7 @@ class ReflexionRondoService:
                 template="partials/panel_queue_control.html",
                 refresh_seconds=0,
                 public=False,
+                grid_w=4, grid_h=2,
             ),
         ]
         for p in self._panels:

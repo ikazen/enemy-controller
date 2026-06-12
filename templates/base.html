@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="dim">
+<html lang="ko" data-theme="silk">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>enemy-controller</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css">
+  <link rel="stylesheet" href="/static/themes.css">
+  <link rel="stylesheet" href="/static/daisyui.css">
+  <link rel="stylesheet" href="/static/gridstack.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-SKbRZtqEfbLbKCGgJiB2eiGWUFaGlMvQoahFzlT5kBdLT1OHdWlvkPO0oQZNg7J" crossorigin="anonymous"></script>
+  <script src="/static/htmx.min.js"></script>
+  <script src="/static/gridstack-all.js"></script>
+  <style>
+    .grid-stack-item-content { inset: 0; position: absolute; }
+    .grid-stack-item-content > .card { height: 100%; overflow-y: auto; }
+  </style>
 </head>
 <body class="min-h-screen bg-base-100">
 

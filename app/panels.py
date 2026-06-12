@@ -39,6 +39,8 @@ class Panel:
     template: str
     refresh_seconds: int = 10
     public: bool = True
+    grid_w: int = 3
+    grid_h: int = 2
 
 
 class ServiceModule(Protocol):

@@ -65,6 +65,7 @@ class InfraService:
                 fetch=_fetch_airflow,
                 template="partials/panel_health.html",
                 refresh_seconds=15,
+                grid_w=3, grid_h=2,
             ),
             Panel(
                 id="infra-grafana",
@@ -72,6 +73,7 @@ class InfraService:
                 fetch=_fetch_grafana,
                 template="partials/panel_health.html",
                 refresh_seconds=15,
+                grid_w=3, grid_h=2,
             ),
             Panel(
                 id="infra-minio",
@@ -79,6 +81,7 @@ class InfraService:
                 fetch=_fetch_minio,
                 template="partials/panel_health.html",
                 refresh_seconds=15,
+                grid_w=3, grid_h=2,
             ),
             Panel(
                 id="infra-reflexion-daemon",
@@ -86,6 +89,7 @@ class InfraService:
                 fetch=_fetch_reflexion_daemon,
                 template="partials/panel_health.html",
                 refresh_seconds=15,
+                grid_w=3, grid_h=2,
             ),
             Panel(
                 id="infra-summary",
@@ -93,6 +97,7 @@ class InfraService:
                 fetch=_fetch_summary,
                 template="partials/panel_metrics.html",
                 refresh_seconds=30,
+                grid_w=4, grid_h=3,
             ),
         ]
         for p in self._panels:
