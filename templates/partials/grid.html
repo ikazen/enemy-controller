@@ -1,0 +1,18 @@
+<div class="mb-5">
+  <h2 class="text-lg font-semibold font-mono">{{ service.title }}</h2>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+  {% for panel in service.panels() %}
+    {% if panel.public or role == "admin" %}
+    <div class="card bg-base-200 shadow-sm border border-base-300 min-h-[120px]"
+         id="panel-{{ panel.id }}"
+         hx-get="/panels/{{ panel.id }}"
+         hx-trigger="load{% if panel.refresh_seconds > 0 %}, every {{ panel.refresh_seconds }}s{% endif %}"
+         hx-swap="innerHTML">
+      <div class="card-body items-center justify-center py-8">
+        <span class="loading loading-spinner loading-sm opacity-40"></span>
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>

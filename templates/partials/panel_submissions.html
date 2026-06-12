@@ -1,0 +1,11 @@
+<div class="card-body p-4 gap-2">
+  <h3 class="font-semibold text-sm font-mono">{{ panel.title }}</h3>
+  <div class="flex flex-col gap-2 mt-1">
+    {% for row in data %}
+    <div class="flex flex-col">
+      <span class="text-xs font-mono">{{ row.competition }}</span>
+      <span class="text-[10px] text-base-content/40 font-mono">{{ row.last_submission_at }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>

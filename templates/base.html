@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dim">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>enemy-controller</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-SKbRZtqEfbLbKCGgJiB2eiGWUFaGlMvQoahFzlT5kBdLT1OHdWlvkPO0oQZNg7J" crossorigin="anonymous"></script>
+</head>
+<body class="min-h-screen bg-base-100">
+
+<div class="drawer lg:drawer-open">
+  <input id="sidebar-toggle" type="checkbox" class="drawer-toggle">
+
+  <div class="drawer-content flex flex-col min-h-screen">
+    <!-- topbar -->
+    <header class="navbar bg-base-200 border-b border-base-300 sticky top-0 z-10 px-4">
+      <div class="flex-none lg:hidden">
+        <label for="sidebar-toggle" class="btn btn-ghost btn-square" aria-label="open sidebar">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </label>
+      </div>
+      <div class="flex-1">
+        <span class="font-mono font-semibold text-base">enemy-controller</span>
+      </div>
+      <div class="flex-none">
+        {% if role == "admin" %}
+          <span class="badge badge-warning font-mono text-xs">admin</span>
+        {% else %}
+          <span class="badge badge-ghost font-mono text-xs">public</span>
+        {% endif %}
+      </div>
+    </header>
+
+    <!-- swappable main content -->
+    <main id="main-content" class="p-6 flex-1">
+      {% block main %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- sidebar -->
+  <div class="drawer-side z-20">
+    <label for="sidebar-toggle" class="drawer-overlay"></label>
+    <nav class="w-52 min-h-full bg-base-200 border-r border-base-300 flex flex-col p-4 gap-1">
+      <p class="text-xs text-base-content/40 uppercase tracking-widest px-3 py-2">Services</p>
+      <ul class="menu menu-sm gap-0.5 w-full">
+        {% for s in services %}
+        <li>
+          <a class="font-mono text-sm"
+             hx-get="/services/{{ s.key }}"
+             hx-target="#main-content"
+             hx-swap="innerHTML"
+             hx-push-url="/services/{{ s.key }}">
+            {{ s.title }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+  </div>
+</div>
+
+</body>
+</html>

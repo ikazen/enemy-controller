@@ -1,0 +1,38 @@
+<div class="card-body p-4 gap-2">
+  <div class="flex items-center gap-2">
+    {% if data.state == "ok" %}
+      <span class="w-2 h-2 rounded-full bg-success flex-shrink-0"></span>
+    {% elif data.state == "degraded" %}
+      <span class="w-2 h-2 rounded-full bg-warning flex-shrink-0"></span>
+    {% elif data.state == "down" %}
+      <span class="w-2 h-2 rounded-full bg-error flex-shrink-0 animate-pulse"></span>
+    {% else %}
+      <span class="w-2 h-2 rounded-full bg-base-content/20 flex-shrink-0"></span>
+    {% endif %}
+    <h3 class="font-semibold text-sm font-mono">{{ panel.title }}</h3>
+  </div>
+
+  <div class="flex flex-col gap-1 mt-1">
+    <div class="flex justify-between items-center">
+      <span class="text-xs text-base-content/50">status</span>
+      <span class="text-xs font-mono font-medium
+        {% if data.state == 'ok' %}text-success
+        {% elif data.state == 'degraded' %}text-warning
+        {% elif data.state == 'down' %}text-error
+        {% else %}text-base-content/40{% endif %}">{{ data.state }}</span>
+    </div>
+    {% if data.latency_ms is not none %}
+    <div class="flex justify-between items-center">
+      <span class="text-xs text-base-content/50">latency</span>
+      <span class="text-xs font-mono">{{ "%.0f"|format(data.latency_ms) }}ms</span>
+    </div>
+    {% endif %}
+    {% if data.detail %}
+    <p class="text-xs text-error/70 mt-1 font-mono">{{ data.detail }}</p>
+    {% endif %}
+  </div>
+
+  <p class="text-[10px] text-base-content/25 font-mono mt-auto">
+    {{ data.checked_at.strftime("%H:%M:%S") }} UTC
+  </p>
+</div>

@@ -1,0 +1,23 @@
+<div class="card-body p-4 gap-2">
+  <h3 class="font-semibold text-sm font-mono">{{ panel.title }}</h3>
+  <div class="overflow-x-auto mt-1">
+    <table class="table table-xs">
+      <thead>
+        <tr>
+          <th class="text-base-content/50 font-normal text-xs">competition</th>
+          <th class="text-base-content/50 font-normal text-xs text-right">best</th>
+          <th class="text-base-content/50 font-normal text-xs text-right">runs</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in data %}
+        <tr>
+          <td class="font-mono text-xs">{{ row.name }}</td>
+          <td class="font-mono text-xs text-right text-success">{{ "%.4f"|format(row.best_score) }}</td>
+          <td class="font-mono text-xs text-right text-base-content/50">{{ row.submissions }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
